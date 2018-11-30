@@ -1,0 +1,48 @@
+xxxxxxxxx xxxpppxxx xxxxxxxxx
+xxxxxxxxx xooKKooox xxxxxxxxx
+xxxxxpppp xoK00oKKx ppppxxxxx
+xxxxxpppp xoK00K00x ppppxxxxx
+xxxxxpppp xoKK0000x ppppxxxxx
+xxxxxpppp xK0000Kox ppppxxxxx
+xxxxxxxxx xK00K00ox xxxxxxxxx
+xxxxxxxxx xoooK00ox xxxxxxxxx
+
+xxxxxxxxx ppppppppp xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ggggggggg xxxxxxxxx
+xxxxxxxxx ppppppppp xxxxxxxxx
+xxxxxxxxx ppppppppp xxxxxxxxx
+
+xxxxxxxxx xxxppppxx xxxxxxxxx
+xxxxxxxxx xxx1654xx xxxxxxxxx
+xxppppppp xxx7236xx pppppppxx
+xxppppppp xxx4524xx pppppppxx
+xxppppppp xxx3627xx pppppppxx
+xxpppxxxx xxx2615xx xxxxpppxx
+xxpppxxxx xxx4122xx xxxxpppxx
+xxpppxxxx xxx5763xx xxxxpppxx
+xxpppxxxx xxx7452xx xxxxpppxx
+
+xxpppxxxx xxx4261xx xonnnnnox
+xxooxooxx xxx4231xx xwoboooex
+xxoereoxx xxx5464xx xwoooooex
+xxoooooxx xxx3473xx xwooSooex
+xxxoooxxx xxx2452xx xwoooooex
+xxxoooxxx xxx1527xx xowboobex
+xxxxpxxxx xxx4223xx xoosossox
+xxxppxxxx xxxppppxx xooosooox
+xxxpppxxx ppppppppp xxxpppxxx
+
+xxxpppxxx xxxpppxxx xxxpppxxx
+xxpppxxxx xxxpppxxx xxxpppxxx
+xxpppxxxx xxxpppxxx xxxpppxxx
+xxpppxxxx xxxpppxxx xxxpppxxx
+xxppppppp ppppppppp pppppppxx
+xxppppppp ppppppppp pppppppxx
+xxppppppp ppppppppp pppppppxx
+xxxxxxxxx ppppppppp xxxxxxxxx
+xxxxxxxxx ppppppppp xxxxxxxxx
