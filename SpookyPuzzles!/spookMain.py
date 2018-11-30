@@ -57,12 +57,15 @@ class Main(PygameGame):
         #counter counts the number ksquare that's being added from the board
         kCount=0
         #initializes the kBoard and adds everything to kValues!
-        self.kBoard=kakuroBoard1()
-        for item in self.kBoard:
+        self.kBoard=KakuroBoard(self,kakuroBoard1())
+        self.kBoard.makeDicts()
+        for item in self.kBoard.board:
             for value in item:
                 if isinstance(value,list):
                     kValues.append(value)
         print(kValues)
+        #initialize kakuro changing tiles
+        self.kTiles=pygame.sprite.Group()
         #initializes map
         for row,tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
@@ -90,10 +93,14 @@ class Main(PygameGame):
                 if tile == 'K':
                     self.kSquares[(col,row)]=kValues[kCount]
                     kCount+=1
+                if str(tile) == 0:
+                    newTile=KTile(self,(row,col))
+                    self.kTiles.add(newTile)
         #makes kakuro squares for puzzle 4
         for location in self.kSquares:
             square=KakuroSquare(self,location,self.kSquares[location])
             self.kSquaresFinal.add(square)
+        print(self.kTiles)
         
     #draws the main "tiles" in the background
     def drawGrid(self):
@@ -102,10 +109,16 @@ class Main(PygameGame):
         for y in range(0,HEIGHT,TILESIZE):
             pygame.draw.line(self.screen,LIGHTGREY,(0,y),(WIDTH,y))
     
+    #FOR PUZZLE 4 KAKURO BOARD
+    def getPlayerKBoardPos(self):
+        marginX,marginY=10,1
+        x,y=self.getPlayerPosition()
+        return (x-marginX,y-marginY)
+    
     def getPlayerBoardPos(self):
         #these numbers will depend on the where the puzzle is on the map
         #I will have to change/calculate these by hand when I change maps
-        marginX,marginY=12,10
+        marginX,marginY=21,19
         x,y=self.getPlayerPosition()
         return (x-marginX,y-marginY)
     
@@ -153,37 +166,7 @@ class Main(PygameGame):
         if tile==5:
             #pauses the game for half a second to allow "bouncing" effect
             #i haven't figured this out yet...:(
-            timePaused=12
-            self.timer=0
-            self.isPaused=True
-            while self.timer<=12:
-                self.isPaused=self.pauseFunction()
-                self.timer=self.timerFired(dt)
-            self.isPaused=False
-            print(self.isPaused)
-            #we have to also check the following tile
-            #the player's actual position
-            preCol,preRow=self.getPlayerPosition()
-            #reverses the keysDown
-            '''if keysDown(pygame.K_RIGHT):
-                keysDown(pygame.K_RIGHT),keysDown(pygame.K_LEFT)=False,True
-            elif keysDown(pygame.K_LEFT):
-                keysDown(pygame.K_RIGHT),keysDown(pygame.K_LEFT)=True,False
-            elif keysDown(pygame.K_UP):
-                keysDown(pygame.K_UP),keysDown(pygame.K_DOWN)=False,True
-            elif keysDown(pygame.K_DOWN):
-                keysDown(pygame.K_UP),keysDown(pygame.K_DOWN)=True,False'''
-            #makes the move with the key
-            self.player.update(dt,keysDown,self.width, self.height)
-            postCol,postRow=self.getPlayerBoardPos()
-            #CHECKS IF PLAYER IS ON THE BOARD
-            if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
-            self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                #if the player is illegal, doesn't let player pass
-                if isLegal(self.player,self.board,postRow,postCol)==False:
-                    self.player.x,self.player.y=preCol,preRow
-                else:
-                    self.applyTile(self.player,self.board,self.isKeyPressed,dt)
+            pass
         #if it's a green tile(7) it should pause the player
         if tile==7:
             #however as we've established i can't get this to work! >:'(
@@ -259,6 +242,21 @@ class Main(PygameGame):
             self.gameOver=False
             self.player.x,self.player.y=self.playerStart
             self.reflection.x,self.reflection.y=self.reflStart
+        #checks if player is on a kakuro tile
+        for tile in self.kTiles:
+            if self.getPlayerPosition()==(tile.x,tile.y):
+                if self.isKeyPressed(pygame.K_1):self.kBoard.board[tile.y][tile.x]=1
+                if self.isKeyPressed(pygame.K_2):self.kBoard.board[tile.y][tile.x]=2
+                if self.isKeyPressed(pygame.K_3):self.kBoard.board[tile.y][tile.x]=3
+                if self.isKeyPressed(pygame.K_4):self.kBoard.board[tile.y][tile.x]=4
+                if self.isKeyPressed(pygame.K_5):self.kBoard.board[tile.y][tile.x]=5
+                if self.isKeyPressed(pygame.K_6):self.kBoard.board[tile.y][tile.x]=6
+                if self.isKeyPressed(pygame.K_7):self.kBoard.board[tile.y][tile.x]=7
+                if self.isKeyPressed(pygame.K_8):self.kBoard.board[tile.y][tile.x]=8
+                if self.isKeyPressed(pygame.K_9):self.kBoard.board[tile.y][tile.x]=9
+            #LEGALITY CHECK
+            if not self.kBoard.isLegal():
+                self.kBoard.board[tile.y][tile.x]=0
             
             
     def redrawAll(self,screen):
@@ -273,6 +271,8 @@ class Main(PygameGame):
             tile.reDraw(screen)
         for square in self.kSquaresFinal:
             square.reDraw(screen)
+        for tile in self.kTiles:
+            tile.reDraw(screen)
         self.player.draw(screen)
         for wall in self.walls:
             wall.reDraw(screen)

@@ -69,3 +69,52 @@ def isLegal(player,board,row,col):
             print("charged!")
             return False
     return True
+    
+def isValid(board,isCharged,row,col):
+    print("row: "+str(row)+" col: "+str(col))
+    #check if it's a red square (basically a wall)
+    try:
+        board[row][col]=="x"
+    except:
+        return False
+    if board[row][col]==4:
+        return False
+    #check if players are charged+purple tile
+    #is the player on a purple tile?
+    elif board[row][col]==1:
+        #is the player charged?
+        if isCharged:
+            #then the player can't be on that tile...
+            print("charged!")
+            return False
+    return True
+
+
+
+def solve(board, isCharged, row, col, visited):
+    # base cases
+    if row == len(board)-1 and col == len(board[0])-1:
+        return visited
+    # recursive case
+    for direction in [(0,1),(0,-1),(1,0),(-1,0)]:
+        drow, dcol = direction
+        if (row+drow, col+dcol) not in visited and \
+            isValid(board,isCharged, row, col):
+            visited.add((row+drow,col+dcol))
+            if board[row][col]==3:
+                isCharged=True
+            if board[row][col]==6:
+                isCharged=False
+            tmpSolution = solve(board, isCharged, row+drow, col+dcol, visited)
+            if tmpSolution != None:
+                return tmpSolution
+            visited.remove((row+drow,col+dcol))
+    return None
+
+def solveBoard(board):
+    visited = set()
+    visited.add((0, 0))
+    isCharged=False
+    return solve(board, isCharged, 0, 0, visited)
+
+print(solveBoard(board3()))

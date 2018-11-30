@@ -1,4 +1,6 @@
 #settings framework borrowed from Chris Bradfield
+import pygame
+pygame.font.init()
 
 # define some colors (R, G, B)
 WHITE = (255, 255, 255)
@@ -13,6 +15,8 @@ ICE = (173,216,230)
 BROWN = (205,175,149)
 ORANGE = (255,165,0)
 SEAGREEN = (46,139,87)
+FONT = pygame.font.SysFont("Times New Roman, Arial",10)
+BIGFONT = pygame.font.SysFont("Times New Roman, Arial",30)
 
 # game settings
 WIDTH = 576   # 7 * 64 
