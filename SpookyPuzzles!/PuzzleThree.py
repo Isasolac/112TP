@@ -68,7 +68,6 @@ def boardText(board):
 
 #writes the file with the board!!! AHHHH IT WORKED WOWEE
 writeFile("puzzle3.txt",boardText(board3()))
-print(readFile("puzzle3.txt"))
 
 def isLegal(player,board,row,col):
     print("row: "+str(row)+" col: "+str(col))

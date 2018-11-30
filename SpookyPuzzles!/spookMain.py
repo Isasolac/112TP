@@ -4,7 +4,8 @@ from Map import *
 from Wall import *
 from Ghost import Ghost
 from os import path
-from PuzzleThree import *
+from Puzzle3 import *
+from KakuroSquare import *
 
 
 
@@ -25,6 +26,9 @@ class Main(PygameGame):
         self.player=Ghost(self,0,0)
         #BACKGROUND COLOR
         self.bgColor=WHITE
+        ######### PUZZLE 1 INIT
+        #initializes list of ending positions (there are two)
+        self.endSpots = []
         ######### PUZZLE 2 INIT
         #INITIALIZES GROUP OF POINTS ON THE SIDE
         self.points = pygame.sprite.Group()
@@ -37,13 +41,28 @@ class Main(PygameGame):
         self.board=board3()
         #INITIALIZES COLORED TILE GROUP
         self.tiles = pygame.sprite.Group()
+        ############## MAP STUFF
         #loads into map data
         self.map=Map("mainMap.txt")
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
         #initializes grouppaths
         self.paths = pygame.sprite.Group()
-        #initializes list of ending positions (there are two)
-        self.endSpots = []
+        ########### PUZZLE 4 INIT
+        #initializes Kakuro squares for puzzle 4!
+        #kvalues are all the list items from self.kBoard
+        kValues=[]
+        #dictionary: keys are x,y; values are botleft,topright numbers!
+        self.kSquares=dict()
+        self.kSquaresFinal=pygame.sprite.Group()
+        #counter counts the number ksquare that's being added from the board
+        kCount=0
+        #initializes the kBoard and adds everything to kValues!
+        self.kBoard=kakuroBoard1()
+        for item in self.kBoard:
+            for value in item:
+                if isinstance(value,list):
+                    kValues.append(value)
+        print(kValues)
         #initializes map
         for row,tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
@@ -68,8 +87,15 @@ class Main(PygameGame):
                 if tile == 'S':
                     self.switch.x,self.switch.y=col,row
                     self.switch.mapX,self.switch.mapY=col,row
+                if tile == 'K':
+                    self.kSquares[(col,row)]=kValues[kCount]
+                    kCount+=1
+    #makes all the kakuro squares for PUZZLE 4
+    def makeKSquares(self):
+        for location in self.kSquares:
+            square=KakuroSquare(self,location,self.kSquares[location])
+            self.kSquaresFinal.append(square)
         
-    
     #draws the main "tiles" in the background
     def drawGrid(self):
         for x in range(0,WIDTH,TILESIZE):
@@ -170,7 +196,6 @@ class Main(PygameGame):
             
     def timerFired(self,dt):
         self.timer+=1
-        print(self.timer)
         if not self.isPaused:
             ################PUZZLE 3
             #the player's actual position
@@ -197,7 +222,29 @@ class Main(PygameGame):
                     self.gameOver=True
             self.points.update()
             self.walls.update()
+            self.kSquaresFinal.update()
         return self.timer
+    
+    #THIS FUNCTION IS ALSO FOR PUZZLE 2 (BLOCKS)
+    #returns None if block not in range, returns direction of push if it is
+    #x1,y1 should be player coordinates, x2,y2 should be block coordinates
+    def direction(self,x1,y1,x2,y2):
+        #checks if it's in range...
+        if abs(x1-x2)==1 and y1==y2 or abs(y1-y2)==1 and x1==x2:
+            #dy=1 if the player is above the block
+            if (y2-y1)==1:
+                return (0,1)
+            #and vice versa
+            elif (y2-y1)==-1:
+                return (0,-1)
+            #dx=1 if player is to the left of the block
+            elif (x2-x1)==1:
+                return (1,0)
+            #and vice versa!
+            elif (x2-x1)==-1:
+                return (-1,0)
+        #else return None!
+        return None
     
     def keyPressed(self,keyCode,modifier):
         #checks if user presses the space key FOR PUZZLE 2
@@ -225,6 +272,8 @@ class Main(PygameGame):
         self.switch.reDraw(screen)
         for tile in self.tiles:
             tile.reDraw(screen)
+        for square in self.kSquaresFinal:
+            square.reDraw(screen)
         self.player.draw(screen)
         for wall in self.walls:
             wall.reDraw(screen)
