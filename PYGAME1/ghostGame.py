@@ -27,7 +27,7 @@ class Game(PygameGame):
         #initializes list of ending positions (there are two)
         self.endSpots = []
         #initializes map
-        for row,tiles in enumerate(self.mapData):
+        for row,tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == 'x':
                     newWall = Wall(self, col, row)
