@@ -11,18 +11,18 @@ class KakuroSquare(pygame.sprite.Sprite):
         self.game=game
         self.scrollX,self.scrollY = self.game.getPlayerPosition()
         self.image = pygame.Surface((TILESIZE,TILESIZE))
-        #choose color based on number
         self.image.fill(LIGHTGREY)
         self.rect = self.image.get_rect()
         self.x,self.y = location
         self.mapX,self.mapY = location
         self.botLeft,self.topRight=values
+        #sets text stuff!
+        
         
     def update(self):
         self.scrollX,self.scrollY = self.game.getPlayerPosition()
         
     def reDraw(self,screen):
-        print("here?")
         midX,midY=3,3
         self.drawX=self.mapX+midX-self.scrollX
         self.drawY=self.mapY+midY-self.scrollY

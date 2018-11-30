@@ -90,11 +90,10 @@ class Main(PygameGame):
                 if tile == 'K':
                     self.kSquares[(col,row)]=kValues[kCount]
                     kCount+=1
-    #makes all the kakuro squares for PUZZLE 4
-    def makeKSquares(self):
+        #makes kakuro squares for puzzle 4
         for location in self.kSquares:
             square=KakuroSquare(self,location,self.kSquares[location])
-            self.kSquaresFinal.append(square)
+            self.kSquaresFinal.add(square)
         
     #draws the main "tiles" in the background
     def drawGrid(self):
