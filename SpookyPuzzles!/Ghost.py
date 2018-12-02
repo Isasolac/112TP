@@ -67,6 +67,7 @@ class Ghost(pygame.sprite.Sprite):
             if wall.x==self.x+dx and wall.y==self.y+dy:
                 print("collided with wall!")
                 return True
+        #add something for closed gate
         return False
         
     def draw(self,screen):
