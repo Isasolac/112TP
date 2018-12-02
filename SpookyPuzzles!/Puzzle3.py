@@ -55,23 +55,83 @@ def boardText(board):
 #writes the file with the board!!! AHHHH IT WORKED WOWEE
 writeFile("puzzle3.txt",boardText(board3()))
 
+
+#FOR PUZZLE 3
+#updates the player's position
+def applyTile(game,player,board,keysDown,dt):
+    #gets where the player is on the board
+    col,row=game.getPlayerBoardPos()
+    #which type of tile is the player on?
+    tile=board[row][col]
+    #this tile is plain unless the player is charged,
+    if tile==1:
+        player.isSliding=False
+        player.key = None
+        player.reversed=False
+    #if it's a plain tile (2), does nothing! (but removes reversed effect)
+    if tile==2:
+        player.isSliding=False
+        player.key = None
+        player.reversed=False
+    #if it's a yellow tile (3), charges the player!
+    if tile==3: 
+        player.isSliding=False
+        player.key = None
+        player.reversed=False
+        player.isCharged=True
+        print("charged!")
+    #if it's an ice tile (6), slides the player once more in their direction
+    elif tile==6: 
+        #discharges the player!
+        player.isCharged=False
+        #pauses the game for a quarter second to allow "sliding" effect
+        player.isSliding=True
+        player.key = keysDown
+        #we have to also check the following tile
+        #the player's actual position
+        preCol,preRow=game.getPlayerPosition()
+        postCol,postRow=game.getPlayerBoardPos()
+        #CHECKS IF PLAYER IS ON THE BOARD
+        '''if game.getPlayerBoardPos()[0]>=0 and game.getPlayerBoardPos()[0]<4 and\
+        game.getPlayerBoardPos()[1]>=0 and game.getPlayerBoardPos()[1]<15:
+            #if the player is illegal, doesn't let player pass
+            if isLegal(player,board,postRow,postCol)==False:
+                player.x,player.y=preCol,preRow
+            else:
+                applyTile(game,player,board,game.isKeyPressed,dt)'''
+    #if it is an orange tile (5) it bounces the player back after a moment..
+    elif tile==5:
+        #pauses the game for half a second to allow "bouncing" effect
+        #i haven't figured this out yet...:(
+        player.reversed=True
+        player.isSliding=True
+        player.key = keysDown
+    #if it's a green tile(7) it should pause the player
+    elif tile==7:
+        player.isSliding=False
+        player.freeze=True
+        player.key = None
+        player.reversed=False#wait 2 seconds
+
+
 def isLegal(player,board,row,col):
     print("row: "+str(row)+" col: "+str(col))
     #check if it's a red square (basically a wall)
     if board[row][col]==4:
+        player.isSliding=False
         return False
     #check if players are charged+purple tile
     #is the player on a purple tile?
     elif board[row][col]==1:
         #is the player charged?
         if player.isCharged:
+            player.isSliding=False
             #then the player can't be on that tile...
             print("charged!")
             return False
     return True
     
 def isValid(board,isCharged,row,col):
-    print("row: "+str(row)+" col: "+str(col))
     #check if it's a red square (basically a wall)
     #backtrack if out of bounds
     try:
@@ -121,4 +181,4 @@ def solveBoard(board):
     isCharged=False
     return solve(board, isCharged, 0, 0, visited)
 
-print(solveBoard(board3()))
+#print(solveBoard(board3()))

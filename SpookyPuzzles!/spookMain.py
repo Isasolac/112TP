@@ -6,6 +6,7 @@ from Ghost import Ghost
 from os import path
 from Puzzle3 import *
 from KakuroSquare import *
+from Puzzle2Objects import *
 
 
 
@@ -109,6 +110,9 @@ class Main(PygameGame):
         for y in range(0,HEIGHT,TILESIZE):
             pygame.draw.line(self.screen,LIGHTGREY,(0,y),(WIDTH,y))
     
+    def getPlayerPosition(self):
+        return (self.player.x,self.player.y)
+    
     #FOR PUZZLE 4 KAKURO BOARD
     def getPlayerKBoardPos(self):
         marginX,marginY=10,1
@@ -118,63 +122,13 @@ class Main(PygameGame):
     def getPlayerBoardPos(self):
         #these numbers will depend on the where the puzzle is on the map
         #I will have to change/calculate these by hand when I change maps
-        marginX,marginY=21,19
+        marginX,marginY=12,18
         x,y=self.getPlayerPosition()
         return (x-marginX,y-marginY)
     
-    def getPlayerPosition(self):
-        return (self.player.x,self.player.y)
     
-    #FOR PUZZLE 3
-    #updates the player's position
-    def applyTile(self,player,board,keysDown,dt):
-        #gets where the player is on the board
-        col,row=self.getPlayerBoardPos()
-        #which type of tile is the player on?
-        tile=board[row][col]
-        #if it's a yellow tile (3), charges the player!
-        if tile==3: self.player.isCharged=True
-        #if it's an ice tile (6), slides the player once more in their direction
-        if tile==6: 
-            #discharges the player!
-            self.player.isCharged=False
-            #pauses the game for half a second to allow "sliding" effect
-            #i haven't figured this out yet...:(
-            timePaused=12
-            self.timer=0
-            self.isPaused=True
-            while self.timer<=12:
-                self.isPaused=self.pauseFunction()
-                self.timer=self.timerFired(dt)
-            self.isPaused=False
-            print(self.isPaused)
-            #we have to also check the following tile
-            #the player's actual position
-            preCol,preRow=self.getPlayerPosition()
-            #makes the move with the key
-            self.player.update(dt,keysDown,self.width, self.height)
-            postCol,postRow=self.getPlayerBoardPos()
-            #CHECKS IF PLAYER IS ON THE BOARD
-            if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
-            self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                #if the player is illegal, doesn't let player pass
-                if isLegal(self.player,self.board,postRow,postCol)==False:
-                    self.player.x,self.player.y=preCol,preRow
-                else:
-                    self.applyTile(self.player,self.board,self.isKeyPressed,dt)
-        #if it is an orange tile (5) it bounces the player back after a moment..
-        if tile==5:
-            #pauses the game for half a second to allow "bouncing" effect
-            #i haven't figured this out yet...:(
-            pass
-        #if it's a green tile(7) it should pause the player
-        if tile==7:
-            #however as we've established i can't get this to work! >:'(
-            pass
         
-    #this function keeps the program busy while it's paused
-    def pauseFunction(self):
-        return True
+   
             
     def timerFired(self,dt):
         self.timer+=1
@@ -182,24 +136,47 @@ class Main(PygameGame):
             ################PUZZLE 3
             #the player's actual position
             preCol,preRow=self.getPlayerPosition()
-            #the player's board position
-            preBCol,preBRow=self.getPlayerBoardPos()
-            #makes the move with the key
-            self.player.update(dt,self.isKeyPressed,self.width, self.height)
-            postCol,postRow=self.getPlayerBoardPos()
-            #CHECKS IF PLAYER IS ON THE BOARD
-            if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
-            self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                #if the player is illegal, doesn't let player pass
-                if isLegal(self.player,self.board,postRow,postCol)==False:
-                    self.player.x,self.player.y=preCol,preRow
-                else:
-                    self.applyTile(self.player,self.board,self.isKeyPressed,dt)
+            if not self.player.isSliding:
+                #makes the move with the key
+                self.player.update(dt,self.isKeyPressed,self.width, self.height)
+                postCol,postRow=self.getPlayerBoardPos()
+                #CHECKS IF PLAYER IS ON THE BOARD
+                if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
+                self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
+                    print("player on puzzle3!")
+                    #if the player is illegal, doesn't let player pass
+                    if isLegal(self.player,self.board,postRow,postCol)==False:
+                        self.player.x,self.player.y=preCol,preRow
+                    else:
+                        applyTile(self, self.player,self.board,self.isKeyPressed,dt)
+                        if self.player.freeze:
+                            pygame.time.wait(1000)
+                            self.player.freeze=False
+            else:
+                #pauses for a sec
+                #pygame.time.wait(250)
+                #makes the move with the key
+                self.player.update(dt,self.player.key,self.width, self.height)
+                postCol,postRow=self.getPlayerBoardPos()
+                #CHECKS IF PLAYER IS ON THE BOARD
+                if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
+                self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
+                    print("player on puzzle3!")
+                    #if the player is illegal, doesn't let player pass
+                    if isLegal(self.player,self.board,postRow,postCol)==False:
+                        self.player.x,self.player.y=preCol,preRow
+                    else:
+                        applyTile(self, self.player,self.board,self.player.key,dt)
             self.tiles.update()
             ##################PUZZLE 2
             self.blocks.update()
             self.switch.update()
             for block in self.blocks:
+                #the block will keep being pushed (sliding) until it collides
+                if block.isPushed:
+                    #this creates the illusion of sliding, because it pauses 
+                    pygame.time.wait(250)
+                    block.push(block.direction)
                 if block.onSwitch():
                     self.gameOver=True
             self.points.update()
@@ -236,7 +213,7 @@ class Main(PygameGame):
                 direction=self.direction(self.player.x,self.player.y,block.x,block.y)
                 if direction != None:
                     block.isPushed=True
-                    block.push(direction)
+                    block.direction = direction
         #reset button for this puzzle
         if self.isKeyPressed(pygame.K_r):
             self.gameOver=False

@@ -12,28 +12,52 @@ class Ghost(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
+        #for puzzle 1 and puzzle 3, for reverse tiles and ect
+        self.reversed=False
         #for puzzle3, sets if player is charged
         self.isCharged = False
+        #for puzzle 3, sets is player is being "moved" by a tile
+        self.isSliding=False
+        self.key = None
+        self.freeze=False
         
     def update(self, dt, keysDown, screenWidth, screenHeight):
-        #initialize dx and dy values
-        dx=0
-        dy=0
-        if keysDown(pygame.K_RIGHT):
-            dx=1
-            self.image=self.imageRight
-        elif keysDown(pygame.K_LEFT):
-            dx=-1
-            self.image=self.imageLeft
-        elif keysDown(pygame.K_UP):
-            dy=-1
-            self.image=self.imageForward
-        elif keysDown(pygame.K_DOWN):
-            dy=1
-            self.image=self.imageForward
+        #if the player stops sliding, they can't be reversed anymore
+        if not self.isSliding:
+            self.reversed=False
+        if not self.reversed:
+            if self.isSliding:
+                pygame.time.wait(250)
+            #initialize dx and dy values
+            dx,dy=0,0
+            if keysDown(pygame.K_RIGHT):
+                dx=1
+                self.image=self.imageRight
+            elif keysDown(pygame.K_LEFT):
+                dx=-1
+                self.image=self.imageLeft
+            elif keysDown(pygame.K_UP):
+                dy=-1
+                self.image=self.imageForward
+            elif keysDown(pygame.K_DOWN):
+                dy=1
+                self.image=self.imageForward
+        else:
+            #initialize dx and dy values
+            dx,dy=0,0
+            if keysDown(pygame.K_RIGHT):
+                dx=-1
+                self.image=self.imageLeft
+            elif keysDown(pygame.K_LEFT):
+                dx=1
+                self.image=self.imageRight
+            elif keysDown(pygame.K_UP):
+                dy=1
+                self.image=self.imageForward
+            elif keysDown(pygame.K_DOWN):
+                dy=-1
+                self.image=self.imageForward
         if not self.collideWithWalls(dx,dy):
-            if dx!=0 or dy!=0:
-                print("updating!")
             self.x += dx
             self.y += dy
             
@@ -41,7 +65,7 @@ class Ghost(pygame.sprite.Sprite):
     def collideWithWalls(self,dx=0,dy=0):
         for wall in self.game.walls:
             if wall.x==self.x+dx and wall.y==self.y+dy:
-                print("collided!")
+                print("collided with wall!")
                 return True
         return False
         
