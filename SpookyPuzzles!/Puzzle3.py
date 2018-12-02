@@ -73,8 +73,10 @@ def isLegal(player,board,row,col):
 def isValid(board,isCharged,row,col):
     print("row: "+str(row)+" col: "+str(col))
     #check if it's a red square (basically a wall)
+    #backtrack if out of bounds
     try:
-        board[row][col]=="x"
+        if board[row][col]==4:
+            return False
     except:
         return False
     if board[row][col]==4:
@@ -99,6 +101,8 @@ def solve(board, isCharged, row, col, visited):
     for direction in [(0,1),(0,-1),(1,0),(-1,0)]:
         drow, dcol = direction
         if (row+drow, col+dcol) not in visited and \
+            (row+drow)>=0 and (col+dcol)>=0 and \
+            (row+drow)<len(board) and (col+dcol)<len(board) and \
             isValid(board,isCharged, row, col):
             visited.add((row+drow,col+dcol))
             if board[row][col]==3:

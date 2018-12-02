@@ -93,7 +93,7 @@ class Main(PygameGame):
                 if tile == 'K':
                     self.kSquares[(col,row)]=kValues[kCount]
                     kCount+=1
-                if str(tile) == 0:
+                if tile == 0:
                     newTile=KTile(self,(row,col))
                     self.kTiles.add(newTile)
         #makes kakuro squares for puzzle 4
