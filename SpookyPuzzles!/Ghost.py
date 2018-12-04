@@ -68,7 +68,23 @@ class Ghost(pygame.sprite.Sprite):
                 print("collided with wall!")
                 return True
         #add something for closed gate
+        for gate in self.game.gates:
+            if gate.isClosed:
+                if gate.x==self.x+dx and gate.y==self.y+dy:
+                    return True
         return False
+    
+    #if the player is on the puzzle1 startspot
+    def onSpotOne(self):
+        spot = self.game.startSpot
+        if spot.x==self.x and spot.y==self.y:
+            return True
+        return False
+    
+    def onEndSpot(self):
+        for spot in self.game.endSpots:
+            if spot.x==self.x and spot.y==self.y:
+                return True
         
     def draw(self,screen):
         #draws ghost at certain tile (topleft midpoint, 4x4)
@@ -87,27 +103,32 @@ class Reflection(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.drawX = 0
+        self.canMove=False
         
     def update(self, dt, keysDown, screenWidth, screenHeight):
         self.scrollX,self.scrollY = self.game.getPlayerPosition()
-        #initialize dx and dy values
-        dx=0
-        dy=0
-        if keysDown(pygame.K_RIGHT):
-            dx=-1
-            self.image=self.imageLeft
-        elif keysDown(pygame.K_LEFT):
-            dx=1
-            self.image=self.imageRight
-        elif keysDown(pygame.K_UP):
-            dy=1
-            self.image=self.imageForward
-        elif keysDown(pygame.K_DOWN):
-            dy=-1
-            self.image=self.imageForward
-        if not self.collideWithWalls(dx,dy):
-            self.x += dx
-            self.y += dy
+        if self.game.puzzleOneEnded:
+            print('KILLLLLL')
+            self.kill()
+        if self.canMove:
+            #initialize dx and dy values
+            dx=0
+            dy=0
+            if keysDown(pygame.K_RIGHT):
+                dx=-1
+                self.image=self.imageLeft
+            elif keysDown(pygame.K_LEFT):
+                dx=1
+                self.image=self.imageRight
+            elif keysDown(pygame.K_UP):
+                dy=1
+                self.image=self.imageForward
+            elif keysDown(pygame.K_DOWN):
+                dy=-1
+                self.image=self.imageForward
+            if not self.collideWithWalls(dx,dy):
+                self.x += dx
+                self.y += dy
          
     
     def collideWithWalls(self,dx=0,dy=0):
@@ -115,8 +136,13 @@ class Reflection(pygame.sprite.Sprite):
             if wall.x==self.x+dx and wall.y==self.y+dy:
                 return True
         return False
-        
-    def draw(self,screen):
+    
+    def onEndSpot(self):
+        for spot in self.game.endSpots:
+            if spot.x==self.x and spot.y==self.y:
+                return True
+    
+    def reDraw(self,screen):
         midX,midY=3,3
         self.drawX=self.x+midX-self.scrollX
         self.drawY=self.y+midY-self.scrollY

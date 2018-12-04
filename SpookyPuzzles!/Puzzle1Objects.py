@@ -51,3 +51,27 @@ class StartSpot(Spot):
         self.mapY = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+        
+    
+        
+class Gate(Spot):
+    def __init__(self,game,x,y):
+        #calls super
+        super(Gate,self).__init__(game, x, y)
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill(WHITE)
+        self.imageClosed = pygame.transform.scale(pygame.image.load("environment/closedGate.png").convert_alpha(),(TILESIZE,TILESIZE))
+        self.rect = self.image.get_rect()
+        self.mapX = x
+        self.mapY = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.isClosed=False
+        
+    def update(self):
+        self.scrollX,self.scrollY = self.game.getPlayerPosition()
+        if self.isClosed:
+            self.image=self.imageClosed
+        else:
+            self.image=pygame.Surface((TILESIZE,TILESIZE))
+            self.image.fill(WHITE)
