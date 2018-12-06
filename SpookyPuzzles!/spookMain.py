@@ -10,12 +10,17 @@ from Puzzle2Objects import *
 from Puzzle1Objects import *
 from coolFractal import Snowflake
 
+#ART CITATIONS
+#GHOST SPRITE FROM FINAL FANTASY 6, SNOW FROM VECTOR.COM,
+#WALL AND GATE FROM OPENGAMEART USER '.bee', KEY FROM LEGEND OF ZELDA
+
 
 
 
 class Main(PygameGame):
     def init(self):
-        self.snowflakeDrawn=False
+        self.gameBegun=False
+        self.drawSnowflake=False
         self.snowflake = Snowflake(self)
         self.timer=0
         self.ghosts=pygame.sprite.Group()
@@ -40,7 +45,7 @@ class Main(PygameGame):
         self.gates = pygame.sprite.Group()
         self.endSpots = pygame.sprite.Group()
         ######### PUZZLE 2 INIT
-        self.puzzleTwoStarted=False
+        self.puzzleTwoStarted=True
         self.puzzleTwoEnded=False
         #INITIALIZES GROUP OF POINTS ON THE SIDE
         self.points = pygame.sprite.Group()
@@ -48,6 +53,7 @@ class Main(PygameGame):
         self.blocks = pygame.sprite.Group()
         #initializes switch
         self.switch=Switch(self,0,0)
+        self.gates2 = pygame.sprite.Group()
         ######### PUZZLE 3 INIT
         #initializes the BOARD
         self.puzzleThreeStarted=False
@@ -67,6 +73,7 @@ class Main(PygameGame):
         self.keys = pygame.sprite.Group()
         ########### PUZZLE 4 INIT
         #initializes Puzzle4 game
+        self.gates3=pygame.sprite.Group()
         self.puzzleFourStarted=False
         self.puzzleFourEnded=False
         #initializes Kakuro squares for puzzle 4!
@@ -106,6 +113,8 @@ class Main(PygameGame):
                 if tile == 'P':
                     self.player.x,self.player.y = col, row
                     self.playerStart = (col, row)
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
                 #initializes the tiles! hehehe
                 if tile.isdigit():
                     newTile = Tile(self,col,row,tile)
@@ -118,15 +127,34 @@ class Main(PygameGame):
                     newBlock = SlidingBlock(self,col,row)
                     self.blocks.add(newBlock)
                     self.walls.add(newBlock)
+                if tile == 'w':
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
+                    newWall=clearWall(self,col,row)
+                    self.walls.add(newWall)
                 if tile == 'S':
                     self.switch.x,self.switch.y=col,row
                     self.switch.mapX,self.switch.mapY=col,row
                 if tile == 'K':
                     self.kSquares[(col,row)]=kValues[kCount]
                     kCount+=1
+                #GATES FOR WIN STATE OF PUZZLES 1,2 AND 4
                 if tile == 'G':
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
                     newGate = Gate(self,col,row)
                     self.gates.add(newGate)
+                if tile == 'o':
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
+                    newGate = Gate(self,col,row)
+                    newGate.isClosed=True
+                    self.gates.add(newGate)
+                if tile == 's':
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
+                    newGate = Gate(self,col,row)
+                    self.gates3.add(newGate)
                 if tile == 'i':
                     self.startSpot = StartSpot(self,col,row)
                     self.spots.add(self.startSpot)
@@ -251,10 +279,16 @@ class Main(PygameGame):
                 self.puzzleFourStarted=True
             else:
                 self.puzzleFourStarted=False
+            if self.kBoard==self.kBoardSolved:
+                self.puzzleFourEnded=True
+                self.gameOver=True
             ##################PUZZLE 2
             self.blocks.update()
             self.switch.update()
             self.kTiles.update()
+            if not self.puzzleTwoEnded:
+                for gate in self.gates2:
+                    gate.isClosed=True
             for block in self.blocks:
                 #the block will keep being pushed (sliding) until it collides
                 if block.isPushed:
@@ -262,12 +296,17 @@ class Main(PygameGame):
                     pygame.time.wait(250)
                     block.push(block.direction)
                 if block.onSwitch():
-                    self.gameOver=True
+                    self.puzzleTwoEnded=True
+                    for gate in self.gates2:
+                        gate.isClosed=False
             self.points.update()
             self.walls.update()
             self.paths.update()
             self.keys.update()
             self.kSquaresFinal.update()
+            if self.player.keys==3:
+                for gate in gates3:
+                    gate.isClosed=False
         return self.timer
     
     #THIS FUNCTION IS ALSO FOR PUZZLE 2 (BLOCKS)
@@ -294,7 +333,8 @@ class Main(PygameGame):
     def keyPressed(self,keyCode,modifier):
         #checks if user presses the space key FOR PUZZLE 2
         if self.isKeyPressed(pygame.K_SPACE):
-            self.snowflake.reDraw(self.screen)
+            self.drawSnowflake=False
+            self.gameBegun=True
             #checks if user's player sprite is in range of a block (L,R,U,D)
             for block in self.blocks:
                 direction=self.direction(self.player.x,self.player.y,block.x,block.y)
@@ -412,7 +452,19 @@ class Main(PygameGame):
         if self.player.isSliding:
             print("slides!")
             pygame.time.wait(300)
-        self.snowflake.reDraw(screen)
+        if self.drawSnowflake==True:
+            self.snowflake.reDraw(screen)
+        if not self.gameBegun:
+            text = TITLEFONT.render(('SPOOKY PUZZLES'),True,BLACK)
+            screen.blit(text,pygame.Rect(2*TILESIZE, 2*TILESIZE, 5*TILESIZE,
+            5*TILESIZE))
+            text2= BIGFONT.render(("PRESS SPACE TO START"),True,BLACK)
+            screen.blit(text2,pygame.Rect(3*TILESIZE, 5*TILESIZE, 3*TILESIZE,
+            3*TILESIZE))
+        if self.puzzleFourStarted:
+            text3= BIGFONT.render(("PRESS H ON SQUARE FOR HINT"),True,BLACK)
+            screen.blit(text2,pygame.Rect(1*TILESIZE, 1*TILESIZE, 5*TILESIZE,
+            3*TILESIZE))
         if self.gameOver==True:
             pygame.draw.rect(self.screen,RED,pygame.Rect(0,3*TILESIZE,WIDTH, 2*TILESIZE))
             screen.blit(self.gameOverImage,pygame.Rect(2*TILESIZE, 2.5*TILESIZE, 3*TILESIZE,

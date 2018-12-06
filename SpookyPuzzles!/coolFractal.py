@@ -24,7 +24,7 @@ class Snowflake(pygame.sprite.Sprite):
             #maps each new point to a relative angle
             pointMap[(x2,y2)]=angle
         if level==0:
-            pygame.draw.polygon(screen,BLACK,triPoints,1)
+            pygame.draw.polygon(screen,SEAGREEN,triPoints,3)
             print("level0!")
         else:
             #recursive case
@@ -47,7 +47,7 @@ class Snowflake(pygame.sprite.Sprite):
             angle=n*dA+offsetAngle
             x2,y2=(cX+r*math.sin(angle)),(cY-r*math.cos(angle))
             triPoints.append((x2,y2))
-        pygame.draw.polygon(screen,BLACK,triPoints,1)
+        pygame.draw.polygon(screen,WHITE,triPoints,3)
         
     def reDraw(self,screen):
         pointMap=dict()
@@ -63,7 +63,7 @@ class Snowflake(pygame.sprite.Sprite):
             x2,y2=(cX+r*math.sin(angle)),(cY-r*math.cos(angle))
             triPoints.append((x2,y2))
             pointMap[(x2,y2)]=angle
-        pygame.draw.polygon(screen,BLACK,triPoints,1)
+        pygame.draw.polygon(screen,WHITE,triPoints,1)
         for point in triPoints:
             pAngle=pointMap[point]
             #distance from center
@@ -71,8 +71,8 @@ class Snowflake(pygame.sprite.Sprite):
             newR=r-dFC
             newCX,newCY=(cX+dFC*math.sin(pAngle)),(cY-dFC*math.cos(pAngle))
             self.drawTriangle(screen,newCX,newCY,pAngle+math.pi/3,newR)
-            self.drawKochSnowflake(screen,newCX,newCY,pAngle+math.pi/3,newR,length,1)
-        self.drawKochSnowflake(screen,cX,cY,math.pi/3,r,length,2)
+            self.drawKochSnowflake(screen,newCX,newCY,pAngle+math.pi/3,newR,length,2)
+        self.drawKochSnowflake(screen,cX,cY,math.pi/3,r,length,3)
         
 
 # koch-snowflake.py

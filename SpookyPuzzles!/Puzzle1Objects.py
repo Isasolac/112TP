@@ -35,8 +35,8 @@ class Gate(Spot):
     def __init__(self,game,x,y):
         #calls super
         super(Gate,self).__init__(game, x, y)
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(WHITE)
+        self.imageOpen = pygame.transform.scale(pygame.image.load("environment/grass.png").convert_alpha(),(TILESIZE,TILESIZE))
+        self.image = self.imageOpen
         self.imageClosed = pygame.transform.scale(pygame.image.load("environment/closedGate.png").convert_alpha(),(TILESIZE,TILESIZE))
         self.rect = self.image.get_rect()
         self.mapX = x
@@ -50,8 +50,7 @@ class Gate(Spot):
         if self.isClosed:
             self.image=self.imageClosed
         else:
-            self.image=pygame.Surface((TILESIZE,TILESIZE))
-            self.image.fill(WHITE)
+            self.image = self.imageOpen
 
 #technically i'll be using this for all 3 puzzles
 class Key(Spot):
@@ -67,4 +66,5 @@ class Key(Spot):
         self.scrollX,self.scrollY=self.game.getPlayerPosition()
         if self.scrollX==self.x and self.scrollY==self.y:
             self.kill()
+            self.game.drawSnowflake=True
             self.game.player.keys+=1

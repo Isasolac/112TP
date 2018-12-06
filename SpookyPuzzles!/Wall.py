@@ -64,6 +64,12 @@ class Wall(pygame.sprite.Sprite):
         screen.blit(self.image,pygame.Rect(self.drawX*TILESIZE, self.drawY*TILESIZE, TILESIZE,
         TILESIZE))
         
+class clearWall(Wall):
+    
+    def reDraw(self,screen):
+        #doesn't draw!!!
+        pass
+        
 #PATHS
 class Path(Spot):
     def __init__(self,game,x,y):
