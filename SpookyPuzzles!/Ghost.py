@@ -21,7 +21,7 @@ class Ghost(pygame.sprite.Sprite):
         self.isSliding=False
         #VELOCITY for puzzlethree
         self.dx,self.dy=0,0
-        self.keys = 2
+        self.keys = 0
         self.freeze=False
         self.canMove=True
     
