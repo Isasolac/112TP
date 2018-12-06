@@ -9,6 +9,7 @@ class Ghost(pygame.sprite.Sprite):
         self.image=self.imageForward
         self.imageLeft=pygame.transform.scale(pygame.image.load("ghostSprite/ghostLeftMid.png").convert_alpha(),(TILESIZE,TILESIZE))
         self.imageRight=pygame.transform.scale(pygame.image.load("ghostSprite/ghostRightMid.png").convert_alpha(),(TILESIZE,TILESIZE))
+        self.imageBack=pygame.transform.scale(pygame.image.load("ghostSprite/ghostBackMid.png").convert_alpha(),(TILESIZE,TILESIZE))
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -18,16 +19,18 @@ class Ghost(pygame.sprite.Sprite):
         self.isCharged = False
         #for puzzle 3, sets is player is being "moved" by a tile
         self.isSliding=False
-        self.key = None
+        self.keys = 0
         self.freeze=False
+        self.canMove=True
         
     def update(self, dt, keysDown, screenWidth, screenHeight):
         #if the player stops sliding, they can't be reversed anymore
-        if not self.isSliding:
+        if self.reversed:
             self.reversed=False
         if not self.reversed:
             if self.isSliding:
                 pygame.time.wait(250)
+                self.canMove=False
             #initialize dx and dy values
             dx,dy=0,0
             if keysDown(pygame.K_RIGHT):
@@ -38,7 +41,7 @@ class Ghost(pygame.sprite.Sprite):
                 self.image=self.imageLeft
             elif keysDown(pygame.K_UP):
                 dy=-1
-                self.image=self.imageForward
+                self.image=self.imageBack
             elif keysDown(pygame.K_DOWN):
                 dy=1
                 self.image=self.imageForward
@@ -61,6 +64,42 @@ class Ghost(pygame.sprite.Sprite):
             self.x += dx
             self.y += dy
             
+    #update for sliding player
+    def slideUpdate(self,dt,keysDown,screenWidth,screenHeight):
+        if not self.reversed:
+            #initialize dx and dy values
+            dx,dy=0,0
+            if keysDown(pygame.K_RIGHT):
+                dx=1
+                self.image=self.imageRight
+            elif keysDown(pygame.K_LEFT):
+                dx=-1
+                self.image=self.imageLeft
+            elif keysDown(pygame.K_UP):
+                dy=-1
+                self.image=self.imageBack
+            elif keysDown(pygame.K_DOWN):
+                dy=1
+                self.image=self.imageForward
+        else:
+            #initialize dx and dy values
+            dx,dy=0,0
+            if keysDown(pygame.K_RIGHT):
+                dx=-1
+                self.image=self.imageLeft
+            elif keysDown(pygame.K_LEFT):
+                dx=1
+                self.image=self.imageRight
+            elif keysDown(pygame.K_UP):
+                dy=1
+                self.image=self.imageForward
+            elif keysDown(pygame.K_DOWN):
+                dy=-1
+                self.image=self.imageForward
+        if not self.collideWithWalls(dx,dy):
+            self.x += dx
+            self.y += dy
+                
     #this function (having to do with the walls) is from Chris Bradfield as well!
     def collideWithWalls(self,dx=0,dy=0):
         for wall in self.game.walls:

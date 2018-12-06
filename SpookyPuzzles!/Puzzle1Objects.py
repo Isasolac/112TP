@@ -1,32 +1,9 @@
 import pygame
 from Wall import Wall
 from settings import *
+from Spot import Spot
 
 
-class Spot(pygame.sprite.Sprite):
-    def __init__(self, game, x, y):
-        #calls super
-        super(Spot,self).__init__()
-        self.game = game
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLACK)
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.mapX = x
-        self.mapY = y
-        self.rect.x = x * TILESIZE
-        self.rect.y = y * TILESIZE
-        
-    def update(self):
-        self.scrollX,self.scrollY = self.game.getPlayerPosition()
-        
-    def reDraw(self,screen):
-        midX,midY=3,3
-        self.drawX=self.mapX+midX-self.scrollX
-        self.drawY=self.mapY+midY-self.scrollY
-        screen.blit(self.image,pygame.Rect(self.drawX*TILESIZE, self.drawY*TILESIZE, TILESIZE,
-        TILESIZE))
         
 class EndSpot(Spot):
     def __init__(self,game,x,y):
@@ -75,3 +52,19 @@ class Gate(Spot):
         else:
             self.image=pygame.Surface((TILESIZE,TILESIZE))
             self.image.fill(WHITE)
+
+#technically i'll be using this for all 3 puzzles
+class Key(Spot):
+    def __init__(self,game,x,y):
+        #calls up
+        super(Key,self).__init__(game,x,y)
+        self.image=pygame.transform.scale(pygame.image.load("environment/key.png").convert_alpha(),(TILESIZE,TILESIZE))
+        self.x,self.y=x,y
+        self.mapX = x
+        self.mapY = y
+    
+    def update(self):
+        self.scrollX,self.scrollY=self.game.getPlayerPosition()
+        if self.scrollX==self.x and self.scrollY==self.y:
+            self.kill()
+            self.game.player.keys+=1

@@ -109,13 +109,11 @@ def applyTile(game,player,board,keysDown,dt):
     #if it's a green tile(7) it should pause the player
     elif tile==7:
         player.isSliding=False
-        player.freeze=True
         player.key = None
         player.reversed=False#wait 2 seconds
 
 
 def isLegal(player,board,row,col):
-    print("row: "+str(row)+" col: "+str(col))
     #check if it's a red square (basically a wall)
     if board[row][col]==4:
         player.isSliding=False

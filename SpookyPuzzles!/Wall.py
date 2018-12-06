@@ -1,5 +1,6 @@
 import pygame
 from settings import *
+from Spot import Spot
 
 
 #colored tiles for puzzle three!
@@ -44,8 +45,7 @@ class Wall(pygame.sprite.Sprite):
         #calls super
         super(Wall,self).__init__()
         self.game = game
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(BLACK)
+        self.image = pygame.transform.scale(pygame.image.load("environment/wall.png").convert_alpha(),(TILESIZE,TILESIZE))
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -63,4 +63,19 @@ class Wall(pygame.sprite.Sprite):
         self.drawY=self.mapY+midY-self.scrollY
         screen.blit(self.image,pygame.Rect(self.drawX*TILESIZE, self.drawY*TILESIZE, TILESIZE,
         TILESIZE))
+        
+#PATHS
+class Path(Spot):
+    def __init__(self,game,x,y):
+        #calls super
+        super(Path,self).__init__(game, x, y)
+        self.image = pygame.transform.scale(pygame.image.load("environment/grass.png").convert_alpha(),(TILESIZE,TILESIZE))
+        self.rect = self.image.get_rect()
+        self.mapX = x
+        self.mapY = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        
+    
+        
  

@@ -49,6 +49,8 @@ class Main(PygameGame):
         #initializes the BOARD
         self.puzzleThreeStarted=False
         self.puzzleThreeEnded=False
+        self.puzzleThreeX=(12,16)
+        self.puzzleThreeY=(18,33)
         self.board=board3()
         #INITIALIZES COLORED TILE GROUP
         self.tiles = pygame.sprite.Group()
@@ -58,7 +60,12 @@ class Main(PygameGame):
         self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
         #initializes grouppaths
         self.paths = pygame.sprite.Group()
+        #initializes keys
+        self.keys = pygame.sprite.Group()
         ########### PUZZLE 4 INIT
+        #initializes Puzzle4 game
+        self.puzzleFourStarted=False
+        self.puzzleFourEnded=False
         #initializes Kakuro squares for puzzle 4!
         #kvalues are all the list items from self.kBoard
         kValues=[]
@@ -70,11 +77,13 @@ class Main(PygameGame):
         #initializes the kBoard and adds everything to kValues!
         self.kBoard=KakuroBoard(self,kakuroBoard1())
         self.kBoard.makeDicts()
+        #HINT BOARD
+        self.kBoardSolved=self.kBoard.solvedBoard
+        print(self.kBoardSolved)
         for item in self.kBoard.board:
             for value in item:
                 if isinstance(value,list):
                     kValues.append(value)
-        print(kValues)
         #initialize kakuro changing tiles
         self.kTiles=pygame.sprite.Group()
         #initializes map
@@ -83,6 +92,14 @@ class Main(PygameGame):
                 if tile == 'x':
                     newWall = Wall(self, col, row)
                     self.walls.add(newWall)
+                if tile == 'k':
+                    newKey = Key(self,col,row)
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
+                    self.keys.add(newKey)
+                if tile == 'p':
+                    newPath = Path(self,col,row)
+                    self.paths.add(newPath)
                 if tile == 'P':
                     self.player.x,self.player.y = col, row
                     self.playerStart = (col, row)
@@ -139,8 +156,6 @@ class Main(PygameGame):
         return (self.player.x,self.player.y)
         
     
-    #FOR PUZZLE 1
-    
     
     #FOR PUZZLE 4 KAKURO BOARD
     def getPlayerKBoardPos(self):
@@ -161,6 +176,8 @@ class Main(PygameGame):
             
     def timerFired(self,dt):
         self.timer+=1
+        #THE PLAYER'S POSITION (FOR GENERAL USE)
+        preCol,preRow=self.getPlayerPosition()
         if not self.puzzleThreeStarted:
             self.player.update(dt,self.isKeyPressed,self.width,self.height)
         if not self.isPaused:
@@ -180,14 +197,19 @@ class Main(PygameGame):
                     if self.player.x!=self.reflection.x or \
                         self.player.y !=self.reflection.y:
                             self.puzzleOneEnded=True
-                            ###########PLAYER GETS A KEY
                             ############ OPENS THE GATES
                             for gate in self.gates:
                                 gate.isClosed=False
             
             ################PUZZLE 3
-            #the player's actual position
-            preCol,preRow=self.getPlayerPosition()
+            #CHECKS IF PLAYER IS ON THE BOARD
+            if preCol>=self.puzzleThreeX[0] and preCol<self.puzzleThreeX[1] and \
+               preRow>=self.puzzleThreeY[0] and preRow<self.puzzleThreeY[1]:
+                   self.puzzleThreeStarted=True
+            else:
+                self.puzzleThreeStarted=False
+                self.player.isSliding=False
+            #ONLY RUNS PUZZLE 3 IF PLAYER IS ON THE BOARD
             if self.puzzleThreeStarted:
                 if not self.player.isSliding:
                     #makes the move with the key
@@ -196,31 +218,35 @@ class Main(PygameGame):
                     #CHECKS IF PLAYER IS ON THE BOARD
                     if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
                     self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                        print("player on puzzle3!")
                         #if the player is illegal, doesn't let player pass
                         if isLegal(self.player,self.board,postRow,postCol)==False:
                             self.player.x,self.player.y=preCol,preRow
                         else:
                             applyTile(self, self.player,self.board,self.isKeyPressed,dt)
                             if self.player.freeze:
-                                pygame.time.wait(1000)
+                                #pygame.time.wait(1000)
                                 self.player.freeze=False
                 else:
                     #pauses for a sec
-                    #pygame.time.wait(250)
+                    pygame.time.wait(250)
                     #makes the move with the key
-                    self.player.update(dt,self.player.key,self.width, self.height)
+                    self.player.slideUpdate(dt,self.player.key,self.width, self.height)
                     postCol,postRow=self.getPlayerBoardPos()
                     #CHECKS IF PLAYER IS ON THE BOARD
                     if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
                     self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                        print("player on puzzle3!")
                         #if the player is illegal, doesn't let player pass
                         if isLegal(self.player,self.board,postRow,postCol)==False:
                             self.player.x,self.player.y=preCol,preRow
                         else:
                             applyTile(self, self.player,self.board,self.player.key,dt)
             self.tiles.update()
+            ##################PUZZLE 4
+            #only evaluates all the puzzle 4 stuff if the player is in range
+            if preRow<15:
+                self.puzzleFourStarted=True
+            else:
+                self.puzzleFourStarted=False
             ##################PUZZLE 2
             self.blocks.update()
             self.switch.update()
@@ -235,6 +261,8 @@ class Main(PygameGame):
                     self.gameOver=True
             self.points.update()
             self.walls.update()
+            self.paths.update()
+            self.keys.update()
             self.kSquaresFinal.update()
         return self.timer
     
@@ -273,63 +301,70 @@ class Main(PygameGame):
             self.gameOver=False
             self.player.x,self.player.y=self.playerStart
             self.reflection.x,self.reflection.y=self.reflStart
-        #checks if player is on a kakuro tile
-        for tile in self.kTiles:
-            if self.getPlayerPosition()==(tile.x,tile.y):
+        if self.puzzleFourStarted:
+            #checks if player is on a kakuro tile
+            for tile in self.kTiles:
                 x,y=self.getPlayerKBoardPos()
-                if self.isKeyPressed(pygame.K_1):
-                    self.kBoard.board[y][x]=1
-                    tile.value='1'
+                if self.getPlayerPosition()==(tile.x,tile.y):
+                    if self.isKeyPressed(pygame.K_h):
+                        self.kBoard.hint(y,x,tile)
+                    elif self.isKeyPressed(pygame.K_1):
+                        self.kBoard.board[y][x]=1
+                        tile.value='1'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_2):
+                        self.kBoard.board[y][x]=2
+                        tile.value='2'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_3):
+                        self.kBoard.board[y][x]=3
+                        tile.value='3'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_4):
+                        self.kBoard.board[y][x]=4
+                        tile.value='4'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_5):
+                        self.kBoard.board[y][x]=5
+                        tile.value='5'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_6):
+                        self.kBoard.board[y][x]=6
+                        tile.value='6'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_7):
+                        self.kBoard.board[y][x]=7
+                        tile.value='7'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_8):
+                        self.kBoard.board[y][x]=8
+                        tile.value='8'
+                        tile.updateText()
+                    elif self.isKeyPressed(pygame.K_9):
+                        self.kBoard.board[y][x]=9
+                        tile.value='9'
+                        tile.updateText()
+                    
+                #LEGALITY CHECK
+                if not self.kBoard.isLegal():
+                    self.kBoard.board[y][x]=0
+                    tile.value='0'
                     tile.updateText()
-                if self.isKeyPressed(pygame.K_2):
-                    self.kBoard.board[y][x]=2
-                    tile.value='2'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_3):
-                    self.kBoard.board[y][x]=3
-                    tile.value='3'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_4):
-                    self.kBoard.board[y][x]=4
-                    tile.value='4'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_5):
-                    self.kBoard.board[y][x]=5
-                    tile.value='5'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_6):
-                    self.kBoard.board[y][x]=6
-                    tile.value='6'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_7):
-                    self.kBoard.board[y][x]=7
-                    tile.value='7'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_8):
-                    self.kBoard.board[y][x]=8
-                    tile.value='8'
-                    tile.updateText()
-                if self.isKeyPressed(pygame.K_9):
-                    self.kBoard.board[y][x]=9
-                    tile.value='9'
-                    tile.updateText()
-                
-            #LEGALITY CHECK
-            '''if not self.kBoard.isLegal():
-                self.kBoard.board[y][x]=0
-                tile.value='0'
-                tile.updateText()'''
             
             
     def redrawAll(self,screen):
         self.screen.fill(BGCOLOR)
         self.drawGrid()
+        for path in self.paths:
+            path.reDraw(screen)
         for tile in self.kTiles:
             tile.reDraw(screen)
         for spot in self.spots:
             spot.reDraw(screen)
         for block in self.blocks:
             block.reDraw(screen)
+        for key in self.keys:
+            key.reDraw(screen)
         for point in self.points:
             point.reDraw(screen)
         self.switch.reDraw(screen)

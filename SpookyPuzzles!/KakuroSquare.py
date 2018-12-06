@@ -1,9 +1,34 @@
 import pygame
 from settings import *
 from Puzzle1Objects import Spot
+import random
+import copy
 pygame.font.init()
 
 
+
+#HINT SECTION: SOLVES BOARD
+def solveBoard(kBoard,board,allVals):
+    #base case
+    if len(allVals)==0:
+        return board
+    else:
+        #tests a number between 1-9
+        for num in range(1,10):
+            #takes off the end of the list and stores it
+            loc=allVals.pop()
+            row,col=loc
+            #sets the location to a number 1-9 (makes move)
+            board[row][col]=num
+            #checks legality
+            if kBoard.isLegal():
+                tmpSolution=solveBoard(kBoard,board,allVals)
+                if tmpSolution!=None:
+                    return tmpSolution
+            #undos the move
+            board[row][col]=0
+            allVals.append((row,col))
+        return None
 
 #class of Kakuro Square we will be using!
 class KakuroSquare(pygame.sprite.Sprite):
@@ -40,9 +65,9 @@ class KakuroSquare(pygame.sprite.Sprite):
             screen.blit(self.text[1],(self.drawX*TILESIZE+TILESIZE-10,self.drawY*TILESIZE))
 
 class KakuroBoard(object):
-    def __init__(self,board):
+    def __init__(self,game,board):
         self.board=board
-        #self.game=game
+        self.game=game
         self.values=[]
         self.colLocs=dict()
         self.rowLocs=dict()
@@ -51,6 +76,11 @@ class KakuroBoard(object):
         self.colHeadValues=dict()
         self.rows=[]
         self.cols=[]
+        #set for solving the board
+        self.allVals=[]
+        #not solved yet!
+        self.solvedBoard=copy.deepcopy(board)
+        self.tempBoard=copy.deepcopy(board)
         for item in self.board:
             for value in item:
                 if isinstance(value,list):
@@ -79,10 +109,11 @@ class KakuroBoard(object):
                         self.cols.append((row,col))
                         #location maps to a col value
                         self.colHeadValues[(row,col)]=colVal
+                #list of everywhere there are changeable values
+                elif item==0:
+                    self.allVals.append((row,col))
                         
-                        
-        print(self.rows)
-        print(self.cols)
+        
         #make rows
         for item in rowLst:
             row,col,value=item
@@ -115,22 +146,31 @@ class KakuroBoard(object):
                         self.colLocs[location].append((row+i,col))
                 else:
                     break
+                    
+        #solves the board now that allVals is made!
+        self.solvedBoard=solveBoard(self,self.board,self.allVals)
+        self.board=self.tempBoard
+    
     
     def checkRows(self):
         for location in self.rows:
+            #gets location and value at that location from dictionary
             row,col=location
-            value=self.board[row][col][1]
+            value=self.rowHeadValues[location]
             valueLst=[]
-            for i in range(1,len(self.board)):
-                if col+i>=len(self.board):
-                    break
-                num=self.board[row][col+i]
-                if type(num)!=list and num!='x':
-                    valueLst.append(num)
-                else:
-                    break
+            #for each place on the board that the colLocation maps to...
+            for loc in self.rowLocs[location]:
+                #gets the value at that location
+                valRow,valCol=loc
+                newValue=self.board[valRow][valCol]
+                #doesn't allow repeats unless zero
+                if newValue!=0 and newValue in valueLst:
+                    return False
+                valueLst.append(newValue)
             amount=sum(valueLst)
-            if amount>=value:
+            if amount>value:
+                return False
+            elif 0 not in valueLst and amount!=value:
                 return False
         return True
         
@@ -138,9 +178,7 @@ class KakuroBoard(object):
         for location in self.cols:
             row,col=location
             value=self.colHeadValues[location]
-            print("location: "+str(location)+" value: "+str(value))
             valueLst=[]
-            print("locationLst: "+str(self.colLocs))
             #for each place on the board that the colLocation maps to...
             for loc in self.colLocs[location]:
                 #gets the value at that location
@@ -150,23 +188,13 @@ class KakuroBoard(object):
                 if newValue!=0 and newValue in valueLst:
                     return False
                 valueLst.append(newValue)
-            '''for i in range(1,len(self.board)):
-                if row+i>=len(self.board):
-                    break
-                num=self.board[row+i][col]
-                if type(num)!=list and num!='x':
-                    valueLst.append(num)
-                else:
-                    break'''
             amount=sum(valueLst)
-            print("valueLst: "+str(valueLst))
             if amount>value:
+                return False
+            elif 0 not in valueLst and amount!=value:
                 return False
         return True
     
-    def locationAffected(self,row,col):
-        #returns a list of the kakuro squares affected by the user input
-        pass
     
     #checks each affected location on the locLst of kakuroSquares
     def isLegal(self):
@@ -176,20 +204,17 @@ class KakuroBoard(object):
         else:
             print("notLegal!")
             return False
-        '''for location in locLst:
-            #CHECKS ROWS
-            rowVal=self.rowValues[location]
-            #checks if it is None
-            if rowVal!="None":
-                #the locations that the value location maps to
-                boardRowLocs=self.rowLocs[location]
-                #sums the location values
-                squareSum=0
-                for square in boardRowLocs:
-                    row,col=square
-                    squareSum+=self.board[row][col]
-            #CHECKS COLS
-            colVal=self.colValues[location]'''
+    
+    #move it to other area
+    def hint(self,row,col,tile):
+        hintVal=self.solvedBoard[row][col]
+        #changes the actual board value
+        self.board[row][col]=hintVal
+        #changes the display tile value and updates the display
+        tile.value=str(hintVal)
+        tile.updateText()
+            
+                
             
         
 
@@ -199,15 +224,12 @@ def kakuroBoard1():
              ['x',[None,4],0,0,'x',[3,None],[4,None]],
              ['x',[None,3],0,0,[11,4],0,0],
              ['x',[3,None],[4,10],0,0,0,0],
-             [[None,11],2,0,0,0,[4,None],'x'],
+             [[None,11],0,0,0,0,[4,None],'x'],
              [[None,4],0,0,[None,4],0,0,'x'],
              ['x','x','x',[None,3],0,0,'x']]
     return board
     
-board1=KakuroBoard(kakuroBoard1())
-board1.makeDicts()
-print(board1.rowLocs)
-print(board1.isLegal())
+
     
 class KTile(Spot):
     def __init__(self,game,x,y):
@@ -237,12 +259,3 @@ class KTile(Spot):
         TILESIZE))
         screen.blit(self.text,(self.drawX*TILESIZE,self.drawY*TILESIZE))
         
-
-'''for i in range(1,len(self.board)):
-        if row+i>=len(self.board):
-            break
-        num=self.board[row+i][col]
-        if type(num)!=list and num!='x':
-            valueLst.append(num)
-        else:
-            break'''
