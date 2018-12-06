@@ -8,12 +8,15 @@ from Puzzle3 import *
 from KakuroSquare import *
 from Puzzle2Objects import *
 from Puzzle1Objects import *
+from coolFractal import Snowflake
 
 
 
 
 class Main(PygameGame):
     def init(self):
+        self.snowflakeDrawn=False
+        self.snowflake = Snowflake(self)
         self.timer=0
         self.ghosts=pygame.sprite.Group()
         #initializes the pause function
@@ -206,12 +209,13 @@ class Main(PygameGame):
             if preCol>=self.puzzleThreeX[0] and preCol<self.puzzleThreeX[1] and \
                preRow>=self.puzzleThreeY[0] and preRow<self.puzzleThreeY[1]:
                    self.puzzleThreeStarted=True
+            #else makes sure the player is not sliding
             else:
                 self.puzzleThreeStarted=False
                 self.player.isSliding=False
             #ONLY RUNS PUZZLE 3 IF PLAYER IS ON THE BOARD
             if self.puzzleThreeStarted:
-                if not self.player.isSliding:
+                '''if not self.player.isSliding:
                     #makes the move with the key
                     self.player.update(dt,self.isKeyPressed,self.width, self.height)
                     postCol,postRow=self.getPlayerBoardPos()
@@ -239,7 +243,7 @@ class Main(PygameGame):
                         if isLegal(self.player,self.board,postRow,postCol)==False:
                             self.player.x,self.player.y=preCol,preRow
                         else:
-                            applyTile(self, self.player,self.board,self.player.key,dt)
+                            applyTile(self, self.player,self.board,self.player.key,dt)'''
             self.tiles.update()
             ##################PUZZLE 4
             #only evaluates all the puzzle 4 stuff if the player is in range
@@ -290,6 +294,7 @@ class Main(PygameGame):
     def keyPressed(self,keyCode,modifier):
         #checks if user presses the space key FOR PUZZLE 2
         if self.isKeyPressed(pygame.K_SPACE):
+            self.snowflake.reDraw(self.screen)
             #checks if user's player sprite is in range of a block (L,R,U,D)
             for block in self.blocks:
                 direction=self.direction(self.player.x,self.player.y,block.x,block.y)
@@ -301,6 +306,29 @@ class Main(PygameGame):
             self.gameOver=False
             self.player.x,self.player.y=self.playerStart
             self.reflection.x,self.reflection.y=self.reflStart
+        #######PUZZLE 3
+        if self.puzzleThreeStarted:
+            #use the arrow keys to navigate!
+            if self.isKeyPressed(pygame.K_RIGHT):
+                dx=1
+                self.player.keyUpdate(dx)
+                self.player.image=self.player.imageRight
+                applyTile(self, self.player,self.board)
+            elif self.isKeyPressed(pygame.K_LEFT):
+                dx=-1
+                self.player.keyUpdate(dx)
+                self.player.image=self.player.imageLeft
+                applyTile(self, self.player,self.board)
+            elif self.isKeyPressed(pygame.K_UP):
+                dy=-1
+                self.player.keyUpdate(0,dy)
+                self.player.image=self.player.imageBack
+                applyTile(self, self.player,self.board)
+            elif self.isKeyPressed(pygame.K_DOWN):
+                dy=1
+                self.player.keyUpdate(0,dy)
+                self.player.image=self.player.imageForward
+                applyTile(self, self.player,self.board)
         if self.puzzleFourStarted:
             #checks if player is on a kakuro tile
             for tile in self.kTiles:
@@ -381,6 +409,10 @@ class Main(PygameGame):
         for gate in self.gates:
             gate.reDraw(screen)
         self.player.draw(screen)
+        if self.player.isSliding:
+            print("slides!")
+            pygame.time.wait(300)
+        self.snowflake.reDraw(screen)
         if self.gameOver==True:
             pygame.draw.rect(self.screen,RED,pygame.Rect(0,3*TILESIZE,WIDTH, 2*TILESIZE))
             screen.blit(self.gameOverImage,pygame.Rect(2*TILESIZE, 2.5*TILESIZE, 3*TILESIZE,

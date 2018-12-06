@@ -19,9 +19,17 @@ class Ghost(pygame.sprite.Sprite):
         self.isCharged = False
         #for puzzle 3, sets is player is being "moved" by a tile
         self.isSliding=False
+        #VELOCITY for puzzlethree
+        self.dx,self.dy=0,0
         self.keys = 0
         self.freeze=False
         self.canMove=True
+    
+    def keyUpdate(self,dx=0,dy=0):
+        self.dx,self.dy=dx,dy
+        self.x+=dx
+        self.y+=dy
+    
         
     def update(self, dt, keysDown, screenWidth, screenHeight):
         #if the player stops sliding, they can't be reversed anymore

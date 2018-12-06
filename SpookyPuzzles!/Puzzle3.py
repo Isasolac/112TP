@@ -58,35 +58,43 @@ writeFile("puzzle3.txt",boardText(board3()))
 
 #FOR PUZZLE 3
 #updates the player's position
-def applyTile(game,player,board,keysDown,dt):
+def applyTile(game,player,board):
     #gets where the player is on the board
     col,row=game.getPlayerBoardPos()
+    #legal undoes move
+    if not isLegal(player,board,row,col):
+        player.x-=player.dx
+        player.y-=player.dy
     #which type of tile is the player on?
+    print("row: "+str(row)+" col: "+str(col))
     tile=board[row][col]
+    #where was the player going?
+    dx,dy=player.dx,player.dy
     #this tile is plain unless the player is charged,
     if tile==1:
         player.isSliding=False
         player.key = None
         player.reversed=False
+        player.dx,player.dy=0,0
     #if it's a plain tile (2), does nothing! (but removes reversed effect)
     if tile==2:
         player.isSliding=False
         player.key = None
         player.reversed=False
+        player.dx,player.dy=0,0
     #if it's a yellow tile (3), charges the player!
     if tile==3: 
         player.isSliding=False
         player.key = None
         player.reversed=False
         player.isCharged=True
-        print("charged!")
+        player.dx,player.dy=0,0
     #if it's an ice tile (6), slides the player once more in their direction
     elif tile==6: 
         #discharges the player!
         player.isCharged=False
         #pauses the game for a quarter second to allow "sliding" effect
         player.isSliding=True
-        player.key = keysDown
         #we have to also check the following tile
         #the player's actual position
         preCol,preRow=game.getPlayerPosition()
@@ -99,18 +107,28 @@ def applyTile(game,player,board,keysDown,dt):
                 player.x,player.y=preCol,preRow
             else:
                 applyTile(game,player,board,game.isKeyPressed,dt)'''
+        #waits for a second
+        game.redrawAll(game.screen)
+        pygame.time.wait(300)
+        player.keyUpdate(player.dx,player.dy)
+        applyTile(game,player,board)
     #if it is an orange tile (5) it bounces the player back after a moment..
     elif tile==5:
         #pauses the game for half a second to allow "bouncing" effect
         #i haven't figured this out yet...:(
         player.reversed=True
+        player.dx*=-1
+        player.dy*=-1
         player.isSliding=True
-        player.key = keysDown
+        pygame.time.wait(300)
+        player.keyUpdate(player.dx,player.dy)
+        applyTile(game,player,board)
     #if it's a green tile(7) it should pause the player
     elif tile==7:
         player.isSliding=False
         player.key = None
         player.reversed=False#wait 2 seconds
+        player.dx,player.dy=0,0
 
 
 def isLegal(player,board,row,col):

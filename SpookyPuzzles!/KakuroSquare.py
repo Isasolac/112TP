@@ -202,7 +202,6 @@ class KakuroBoard(object):
         if self.checkCols() and self.checkRows():
             return True
         else:
-            print("notLegal!")
             return False
     
     #move it to other area
