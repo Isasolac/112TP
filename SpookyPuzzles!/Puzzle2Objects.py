@@ -9,8 +9,7 @@ class SlidingBlock(Wall):
     def __init__(self,game,x,y):
         #calls super (extends the Wall class so it's "solid" to the player)
         super(SlidingBlock,self).__init__(game,x,y)
-        self.image = pygame.Surface((TILESIZE, TILESIZE))
-        self.image.fill(SEAGREEN)
+        self.image = pygame.transform.scale(pygame.image.load("environment/block.png").convert_alpha(),(TILESIZE,TILESIZE))
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y

@@ -133,12 +133,15 @@ def applyTile(game,player,board):
 
 def isLegal(player,board,row,col):
     #check if it's a red square (basically a wall)
-    if board[row][col]==4:
-        player.isSliding=False
+    try:
+        if board[row][col]==4:
+            player.isSliding=False
+            return False
+    except:
         return False
     #check if players are charged+purple tile
     #is the player on a purple tile?
-    elif board[row][col]==1:
+    if board[row][col]==1:
         #is the player charged?
         if player.isCharged:
             player.isSliding=False

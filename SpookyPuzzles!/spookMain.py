@@ -242,36 +242,6 @@ class Main(PygameGame):
                 self.puzzleThreeStarted=False
                 self.player.isSliding=False
             #ONLY RUNS PUZZLE 3 IF PLAYER IS ON THE BOARD
-            if self.puzzleThreeStarted:
-                '''if not self.player.isSliding:
-                    #makes the move with the key
-                    self.player.update(dt,self.isKeyPressed,self.width, self.height)
-                    postCol,postRow=self.getPlayerBoardPos()
-                    #CHECKS IF PLAYER IS ON THE BOARD
-                    if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
-                    self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                        #if the player is illegal, doesn't let player pass
-                        if isLegal(self.player,self.board,postRow,postCol)==False:
-                            self.player.x,self.player.y=preCol,preRow
-                        else:
-                            applyTile(self, self.player,self.board,self.isKeyPressed,dt)
-                            if self.player.freeze:
-                                #pygame.time.wait(1000)
-                                self.player.freeze=False
-                else:
-                    #pauses for a sec
-                    pygame.time.wait(250)
-                    #makes the move with the key
-                    self.player.slideUpdate(dt,self.player.key,self.width, self.height)
-                    postCol,postRow=self.getPlayerBoardPos()
-                    #CHECKS IF PLAYER IS ON THE BOARD
-                    if self.getPlayerBoardPos()[0]>=0 and self.getPlayerBoardPos()[0]<4 and\
-                    self.getPlayerBoardPos()[1]>=0 and self.getPlayerBoardPos()[1]<15:
-                        #if the player is illegal, doesn't let player pass
-                        if isLegal(self.player,self.board,postRow,postCol)==False:
-                            self.player.x,self.player.y=preCol,preRow
-                        else:
-                            applyTile(self, self.player,self.board,self.player.key,dt)'''
             self.tiles.update()
             ##################PUZZLE 4
             #only evaluates all the puzzle 4 stuff if the player is in range
@@ -279,7 +249,8 @@ class Main(PygameGame):
                 self.puzzleFourStarted=True
             else:
                 self.puzzleFourStarted=False
-            if self.kBoard==self.kBoardSolved:
+            if self.kBoard.gameOver():
+                print("gameover!")
                 self.puzzleFourEnded=True
                 self.gameOver=True
             ##################PUZZLE 2
@@ -305,7 +276,7 @@ class Main(PygameGame):
             self.keys.update()
             self.kSquaresFinal.update()
             if self.player.keys==3:
-                for gate in gates3:
+                for gate in self.gates3:
                     gate.isClosed=False
         return self.timer
     
@@ -463,7 +434,7 @@ class Main(PygameGame):
             3*TILESIZE))
         if self.puzzleFourStarted:
             text3= BIGFONT.render(("PRESS H ON SQUARE FOR HINT"),True,BLACK)
-            screen.blit(text2,pygame.Rect(1*TILESIZE, 1*TILESIZE, 5*TILESIZE,
+            screen.blit(text3,pygame.Rect(1*TILESIZE, 1*TILESIZE, 5*TILESIZE,
             3*TILESIZE))
         if self.gameOver==True:
             pygame.draw.rect(self.screen,RED,pygame.Rect(0,3*TILESIZE,WIDTH, 2*TILESIZE))

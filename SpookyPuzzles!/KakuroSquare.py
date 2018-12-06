@@ -151,6 +151,13 @@ class KakuroBoard(object):
         self.solvedBoard=solveBoard(self,self.board,self.allVals)
         self.board=self.tempBoard
     
+    def gameOver(self):
+        for location in self.allVals:
+            row,col=location
+            if self.board[row][col]==0:
+                return False
+            else:
+                return True
     
     def checkRows(self):
         for location in self.rows:
@@ -209,6 +216,8 @@ class KakuroBoard(object):
         hintVal=self.solvedBoard[row][col]
         #changes the actual board value
         self.board[row][col]=hintVal
+        if self.board==self.solvedBoard:
+            self.game.gameOver=True
         #changes the display tile value and updates the display
         tile.value=str(hintVal)
         tile.updateText()
