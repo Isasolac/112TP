@@ -1,0 +1,4 @@
+
+In this game, you are playing as a ghost trying to solve puzzles! Solving each puzzle to get a key and a cool snowflake picture (press space to make it go away). For the puzzle on the left, your clone moves the opposite direction and you have to get both of them on the top green tiles. For the one on the right, push the blocks around until you can land one on the switch. For the middle puzzle, green and brown tiles are regular, blue tiles teleport players to the next tile, and orange tiles bounce/reverse the player backwards. If the player steps on a yellow tile they are charged, and can discharge by teleporting. If they are charged, they can’t walk on purple tiles! The last puzzle opens once you get three keys. It’s a kakuro puzzle. Solve it to finish the game!
+
+https://youtu.be/CtaTZYEIt-M
